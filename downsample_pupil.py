@@ -28,14 +28,17 @@ for s, sub in enumerate(sub_list):
         pupil_ds = data_ds.pupilsize.to_numpy()
 
         # Downsampling moving average
-        TR = 2100 #ms
+        TR = 2.1 #seconds
+        sf = 250
+        si = 1/sf
+        window = int((TR/si)/2)
     
         indices = data.loc[data['fmritrigger'] == 1].index.to_numpy()
-        start = indices - int(TR/2)
+        start = indices - window
         
         pupil_ds_ma = np.full((len(indices)), np.nan)
         for c, s in enumerate(start):
-            epoch = data[s: s+TR].pupilsize.to_numpy()
+            epoch = data[s: s+window*2].pupilsize.to_numpy()
             pupil_ds_ma[c] = np.mean(epoch)
 
         # Save
