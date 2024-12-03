@@ -45,18 +45,15 @@ for s, sub in enumerate(sub_list):
         np.savetxt(folder_output+'pupil_ds_{}_{}.1D'.format(sub, session), pupil_ds)
         np.savetxt(folder_output+'pupil_ds_ma_{}_{}.1D'.format(sub, session), pupil_ds_ma)
 
-# Clean 
-# Normalization
-pupil_mean = np.mean(pupil_ds)
-pupil_std = np.std(pupil_ds)
+        # Get pupilsize 
+        data_pos = data.loc[data['time']>=0]
 
-pupil_zscore = (pupil_ds-pupil_mean)/pupil_std
+        # Normalization
+        pupil_mean = np.mean(data_pos.pupilsize)
+        pupil_std = np.std(data_pos.pupilsize)
+        data_pos['pupil_zscore'] = (data_pos.pupilsize-pupil_mean)/pupil_std
+        
+        data_pos['pupil_high_low'] = (data_pos.pupil_zscore > 0)*1
+        data_pos['zerocol'] = 0
 
-pupil_high = (pupil_zscore > 0)*1
-pupil_low = (pupil_zscore < 0)*1
-
-plt.plot(np.arange(pupil_zscore.shape[0])[pupil_high], pupil_zscore[pupil_high], color='red', marker='.')
-plt.plot(np.arange(pupil_zscore.shape[0])[pupil_low], pupil_zscore[pupil_low], color='green', marker='.')
-
-plt.savefig('prova.png')
-print('')
+        data_pos[['time', 'zerocol', 'pupil_high_low']].to_csv(folder_output+'pupil_hl_{}_{}.csv'.format(sub, session))
