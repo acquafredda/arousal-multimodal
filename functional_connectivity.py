@@ -85,6 +85,35 @@ def plot_fc(fc, fc_diff, picname):
     # Save  
     plt.savefig('{}.png'.format(picname))
 
+def t_tests(func_conn_diff):
+    
+    n_rois = func_conn_diff.shape[-1]
+
+    # Initialize matrices to store t-stats and p-values
+    t_stats = np.full((n_rois, n_rois), np.nan)
+    p_values = np.full((n_rois, n_rois), np.nan)
+
+    # Loop through each pair of ROIs
+    for i in range(n_rois):
+        for j in range(n_rois):
+            # Extract differences across subjects for the ROI pair (i, j)
+            roi_diff = func_conn_diff[:, i, j]
+            
+            # Perform a one-sample t-test against zero
+            t_stat, p_val = ttest_1samp(roi_diff, popmean=0, nan_policy='omit')
+            
+            # Store the results
+            t_stats[i, j] = t_stat
+            p_values[i, j] = p_val
+
+    # Correct for multiple comparisons using False Discovery Rate (FDR)
+    q_values = false_discovery_control(p_values)
+
+    # Save t-stats and p-values
+    np.savez('derivatives/functional_connectivity/FC_differences_stats.npz', t_stats=t_stats, p_values=p_values, q_values=q_values)
+
+    return t_stats, p_values, q_values
+
 if __name__ == '__main__':
     
     sub_list = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10']
@@ -128,27 +157,7 @@ if __name__ == '__main__':
         picname = 'func_conn_supersub_{}'.format(measure)
         plot_fc(func_conn_super, func_conn_super_diff, picname)
 
-    # Initialize matrices to store t-stats and p-values
-    t_stats = np.full((n_rois, n_rois), np.nan)
-    p_values = np.full((n_rois, n_rois), np.nan)
-
-    # Loop through each pair of ROIs
-    for i in range(n_rois):
-        for j in range(n_rois):
-            # Extract differences across subjects for the ROI pair (i, j)
-            roi_diff = func_conn_diff[:, i, j]
-            
-            # Perform a one-sample t-test against zero
-            t_stat, p_val = ttest_1samp(roi_diff, popmean=0, nan_policy='omit')
-            
-            # Store the results
-            t_stats[i, j] = t_stat
-            p_values[i, j] = p_val
-
-    # Correct for multiple comparisons using False Discovery Rate (FDR)
-    q_values = false_discovery_control(p_values)
-
-    # Save t-stats and p-values
-    np.savez('derivatives/functional_connectivity/FC_differences_stats.npz', t_stats=t_stats, p_values=p_values, q_values=q_values)
-
-    print('done')
+    # T-tests
+    t_stats = np.load('derivatives/functional_connectivity/FC_differences_stats.npz')['t_stats']
+    p_values = np.load('derivatives/functional_connectivity/FC_differences_stats.npz')['p_values']
+    q_values = np.load('derivatives/functional_connectivity/FC_differences_stats.npz')['q_values']
