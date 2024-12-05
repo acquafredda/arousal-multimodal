@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
+import os
 
 def get_pupilsize_categ(pupilsize):
 
@@ -19,10 +20,10 @@ if __name__ == '__main__':
         
     # Define params
     save = True
-    filepath = 'data/sub-{}_ses-{}_task-rest_recording-eyetracking_physio.tsv'
-    sub_list = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10']
-    ses_list = ['01', '02']
-    folder_output = 'derivatives/pupil/'
+    filepath = 'data/sub-{}/sub-{}_ses-{}_task-rest_recording-eyetracking_physio.tsv'
+    sub_list = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '17', '18', '19', '21', '22']
+    ses_list = ['01']
+    folder_output = 'derivatives/pupil/sub-{}/'
     columns = ['time', 'gazeH', 'gazeV', 'pupilsize', 'resX', 'resY', 'fixation', 'saccade', 'blink', 'tasktrigger', 'timetrigger', 'fmritrigger', 'interpolsamples']
 
     for s, sub in enumerate(sub_list):
@@ -30,7 +31,7 @@ if __name__ == '__main__':
             
             # Load data for each sub and session
             try:
-                data = pd.read_csv(filepath.format(sub, session),  sep='\t', header=None)
+                data = pd.read_csv(filepath.format(sub, sub, session),  sep='\t', header=None)
 
             except FileNotFoundError:
                 continue
@@ -69,7 +70,10 @@ if __name__ == '__main__':
 
             # Save
             if save:
-                data_pos[['time', 'zerocol', 'pupil_high_low']].to_csv(folder_output+'pupil_hl_{}_{}.csv'.format(sub, session))
-                np.savetxt(folder_output+'pupil_ds_{}_{}.1D'.format(sub, session), pupil_ds)
-                np.savetxt(folder_output+'pupil_ds_ma_{}_{}.1D'.format(sub, session), pupil_ds_ma)
-                np.savetxt(folder_output+'pupil_cat_ds_ma_{}_{}.txt'.format(sub, session), pupil_highlow_dsma)
+                if not os.path.exists(folder_output.format(sub)):
+                    os.makedirs(folder_output.format(sub))
+                
+                data_pos[['time', 'zerocol', 'pupil_high_low']].to_csv(folder_output.format(sub)+'sub-{}_pupil_hl.csv'.format(sub, session))
+                np.savetxt(folder_output.format(sub)+'sub-{}_pupil_ds.1D'.format(sub), pupil_ds)
+                np.savetxt(folder_output.format(sub)+'sub-{}_pupil_ds_ma.1D'.format(sub), pupil_ds_ma)
+                np.savetxt(folder_output.format(sub)+'sub-{}_pupil_cat_ds_ma.txt'.format(sub), pupil_highlow_dsma)
