@@ -186,12 +186,10 @@ if __name__ == '__main__':
     # Identify significant couples
     labels = np.loadtxt('data/Schaefer_7N400_labels.txt', dtype=str)
     macro_roi = [l.split('_')[1] for l in labels[:200]]
-    ticks_net = [int((np.where(np.array(macro_roi)==net)[0][-1] - np.where(np.array(macro_roi)==net)[0][0])/2) for net in np.unique(macro_roi)]
-    ticks_net_lab = np.unique(macro_roi)
-    sign_idxs = np.where(p_values<0.001)
+    sign_idxs = np.where(p_values<0.0)
     sign_pairs = [(sign_idxs[0][c], sign_idxs[1][c]) for c in range(sign_idxs[0].shape[0])]
     for pair in sign_pairs:
-        print(labels[:200][pair[0]], '    vs    ', labels[:200][pair[1]])
+        print(macro_roi[pair[0]], '    vs    ', macro_roi[pair[1]])
     
     # Plot FC for high, low and difference
     if plot:
@@ -201,23 +199,3 @@ if __name__ == '__main__':
 
         picname = 'func_conn_supersub_{}_avghemisphere'.format(measure)
         plot_fc(func_conn_super, func_conn_super_diff, picname)
-
-        # Plot t-statistics and corrected p-values
-        fig, axs = plt.subplots(1, 2, figsize=(12, 6))
-
-        # T-statistics heatmap
-        sns.heatmap(t_stats, cmap='coolwarm', square=True, ax=axs[0], cbar_kws={'shrink': 0.6})
-        axs[0].set_title('T-statistics (Group-Level)')
-        axs[0].set_xticks([])
-        axs[0].set_yticks([])
-
-        # Corrected p-values heatmap
-        sns.heatmap(q_values, cmap='viridis', square=True, ax=axs[1], cbar_kws={'shrink': 0.6})
-        axs[1].set_title('Corrected P-values (FDR)')
-        axs[1].set_xticks([])
-        axs[1].set_yticks([])
-
-        plt.tight_layout()
-        plt.savefig('functional_connectivity_group_stats_avghemisphere.png')
-
-    print('done')

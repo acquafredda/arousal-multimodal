@@ -1,0 +1,5 @@
+Una volta calcolata la FC tra tutte le coppie di ROI per HighArousal condition e LowArousal condition, 
+abbiamo fatto one-sample t-test per identificare differenze significative tra FC during high e FC during low.
+Nessun contrasto sopravvive a FDR, ma, senza correzione, 4 coppie di ROI hanno p-value < 0.001.
+Sembra dunque che ci sia una maggiore FC durante high arousal compared to low arousal tra il 
+Saliency network e i SomMot, Default e Control networks.
